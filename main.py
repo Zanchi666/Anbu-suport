@@ -17,7 +17,7 @@ tickets = {}
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-    channel = bot.get_channel(int(os.getenv('CHANNEL_ID')))  # Вставте ID вашого каналу
+    channel = bot.get_channel(int(os.getenv('1250019961905217686')))  # Вставте ID вашого каналу
     await channel.send(embed=discord.Embed(title="Підтримка", description="Натисніть кнопку нижче, щоб створити тікет"),
                        view=TicketCreateView())
     check_tickets.start()
