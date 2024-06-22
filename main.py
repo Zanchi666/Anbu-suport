@@ -64,6 +64,7 @@ class TicketCreateView(discord.ui.View):
                 await interaction.response.send_message("Бот не має дозволу на керування каналами.", ephemeral=True)
                 return
 
+            print(f"Creating channel with name: ticket-{ticket_counter}")
             ticket_channel = await guild.create_text_channel(f"ticket-{ticket_counter}")
             ticket_counter += 1
             print(f"Ticket channel created: {ticket_channel}")
@@ -73,8 +74,10 @@ class TicketCreateView(discord.ui.View):
             for role_id in SUPPORT_ROLE_IDS:
                 support_role = guild.get_role(role_id)
                 if support_role:
+                    print(f"Setting permissions for role: {support_role}")
                     await ticket_channel.set_permissions(support_role, read_messages=True, send_messages=True)
             await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
+            print(f"Permissions set for {interaction.user} in channel {ticket_channel}")
 
             tickets[ticket_channel.id] = {
                 "user": interaction.user.id,
