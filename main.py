@@ -50,6 +50,10 @@ class TicketCreateView(discord.ui.View):
             print("Attempting to create ticket channel...")
             guild = interaction.guild
             print(f"Guild: {guild}")
+
+            # Додаткове логування для перевірки прав доступу
+            print(f"Bot permissions in the guild: {guild.me.guild_permissions}")
+
             ticket_channel = await guild.create_text_channel(f"ticket-{interaction.user.name}")
             print(f"Ticket channel created: {ticket_channel}")
 
