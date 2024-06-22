@@ -38,7 +38,7 @@ async def on_ready():
             )
             print(f"Message sent to channel ID {CHANNEL_ID}.")
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"An error occurred while sending message to channel: {e}")
     check_tickets.start()
 
 # Клас для створення тікетів
@@ -58,6 +58,11 @@ class TicketCreateView(discord.ui.View):
             # Додаткові логи для перевірки прав
             print(f"Bot permissions in the guild: {guild.me.guild_permissions}")
 
+            if not guild.me.guild_permissions.manage_channels:
+                print("Bot does not have permission to manage channels")
+                await interaction.response.send_message("Бот не має дозволу на керування каналами.", ephemeral=True)
+                return
+
             ticket_channel = await guild.create_text_channel(f"ticket-{interaction.user.name}")
             print(f"Ticket channel created: {ticket_channel}")
 
@@ -65,10 +70,14 @@ class TicketCreateView(discord.ui.View):
                 "user": interaction.user.id,
                 "created_at": datetime.utcnow()
             }
+            print(f"Ticket info saved: {tickets[ticket_channel.id]}")
+
             await ticket_channel.send(
                 f"{interaction.user.mention}, ваш тікет створено! Адміністрація скоро зв'яжеться з вами.",
                 view=TicketCloseView(ticket_channel.id)
             )
+            print(f"Message sent in ticket channel {ticket_channel.id}")
+
             await interaction.response.send_message("Тікет успішно створено!", ephemeral=True)
             print(f"Ticket channel {ticket_channel.name} created for {interaction.user}.")
         except Exception as e:
@@ -88,8 +97,14 @@ class TicketCloseView(discord.ui.View):
         try:
             channel = bot.get_channel(self.channel_id)
             await channel.send("Тікет закрито! Канал буде видалено через 7 днів.")
+            print(f"Close message sent in channel {self.channel_id}")
+
             tickets[self.channel_id]['closed_at'] = datetime.utcnow()
+            print(f"Ticket close time updated: {tickets[self.channel_id]['closed_at']}")
+
             await channel.set_permissions(interaction.guild.default_role, send_messages=False, read_messages=False)
+            print(f"Permissions updated for channel {self.channel_id}")
+
             await interaction.response.send_message("Тікет успішно закрито!", ephemeral=True)
             print(f"Ticket in channel {self.channel_id} closed.")
         except Exception as e:
@@ -122,8 +137,10 @@ async def check_tickets():
             await log_channel.send(
                 f"Тікет від {user.mention} створений {created_at} закрито {closed_at} видалено."
             )
+            print(f"Log message sent for ticket in channel {channel_id}")
+
             del tickets[channel_id]
-            print(f"Ticket log for channel {channel_id} sent to log channel.")
+            print(f"Ticket info deleted for channel {channel_id}")
         except Exception as e:
             print(f"Error logging ticket deletion for channel {channel_id}: {e}")
 
