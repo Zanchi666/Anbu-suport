@@ -43,6 +43,10 @@ async def on_ready():
 
 # Клас для створення тікетів
 class TicketCreateView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+        print("TicketCreateView initialized")
+
     @discord.ui.button(label="Створити тікет", style=discord.ButtonStyle.green)
     async def create_ticket(self, button: discord.ui.Button, interaction: discord.Interaction):
         print(f"Button clicked by {interaction.user}. Creating ticket...")
@@ -50,6 +54,10 @@ class TicketCreateView(discord.ui.View):
             print("Attempting to create ticket channel...")
             guild = interaction.guild
             print(f"Guild: {guild}")
+
+            # Додаткові логи для перевірки прав
+            print(f"Bot permissions in the guild: {guild.me.guild_permissions}")
+
             ticket_channel = await guild.create_text_channel(f"ticket-{interaction.user.name}")
             print(f"Ticket channel created: {ticket_channel}")
 
@@ -72,6 +80,7 @@ class TicketCloseView(discord.ui.View):
     def __init__(self, channel_id):
         super().__init__(timeout=None)
         self.channel_id = channel_id
+        print(f"TicketCloseView initialized for channel {channel_id}")
 
     @discord.ui.button(label="Закрити тікет", style=discord.ButtonStyle.red)
     async def close_ticket(self, button: discord.ui.Button, interaction: discord.Interaction):
