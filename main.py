@@ -17,7 +17,7 @@ tickets = {}
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-    channel_id = os.getenv('1250019961905217686')
+    channel_id = os.getenv('CHANNEL_ID')  # Використовуйте ім'я змінної середовища
     if channel_id is None:
         print("CHANNEL_ID is not set in environment variables.")
         return
