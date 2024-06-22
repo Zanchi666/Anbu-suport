@@ -14,31 +14,29 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 # Словник для зберігання тікетів
 tickets = {}
 
+# ID каналу для надсилання повідомлень
+CHANNEL_ID = 1250019961905217686
+LOG_CHANNEL_ID = 1254109085352333332
+
 # Подія, яка виконується, коли бот готовий
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-    channel_id = os.getenv('1250019961905217686')
-    
-    # Перевірка, чи встановлено CHANNEL_ID у змінних середовища
-    if channel_id is None:
-        print("CHANNEL_ID is not set in environment variables.")
-        return
     
     try:
         # Спроба отримати канал за ID
-        print(f"Attempting to get channel with ID {channel_id}")
-        channel = bot.get_channel(int(channel_id))
+        print(f"Attempting to get channel with ID {CHANNEL_ID}")
+        channel = bot.get_channel(CHANNEL_ID)
         
         if channel is None:
-            print(f"Channel with ID {channel_id} not found.")
+            print(f"Channel with ID {CHANNEL_ID} not found.")
         else:
-            print(f"Channel with ID {channel_id} found: {channel}")
+            print(f"Channel with ID {CHANNEL_ID} found: {channel}")
             await channel.send(
                 embed=discord.Embed(title="Підтримка", description="Натисніть кнопку нижче, щоб створити тікет"),
                 view=TicketCreateView()
             )
-            print(f"Message sent to channel ID {channel_id}.")
+            print(f"Message sent to channel ID {CHANNEL_ID}.")
     except Exception as e:
         print(f"An error occurred: {e}")
     check_tickets.start()
@@ -99,7 +97,7 @@ async def check_tickets():
                 print(f"Error deleting channel {channel_id}: {e}")
     for channel_id in to_delete:
         try:
-            log_channel = bot.get_channel(int(os.getenv('1254109085352333332')))
+            log_channel = bot.get_channel(LOG_CHANNEL_ID)
             user = bot.get_user(tickets[channel_id]['user'])
             created_at = tickets[channel_id]['created_at']
             closed_at = tickets[channel_id]['closed_at']
