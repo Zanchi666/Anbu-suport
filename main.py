@@ -6,6 +6,7 @@ import os
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True  # Додайте цю стрічку
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
@@ -63,8 +64,11 @@ async def check_tickets():
         del tickets[channel_id]
 
 def main():
+    token = os.getenv('BOT_TOKEN')
+    if token is None:
+        raise ValueError("No BOT_TOKEN provided")
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(bot.start(os.getenv('BOT_TOKEN')))
+    loop.run_until_complete(bot.start(token))
 
 if __name__ == "__main__":
     main()
