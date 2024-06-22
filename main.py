@@ -13,18 +13,20 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 # Словник для зберігання тікетів
 tickets = {}
+ticket_counter = 1
 
 # ID каналу для надсилання повідомлень
 CHANNEL_ID = 1250019961905217686
 LOG_CHANNEL_ID = 1254109085352333332
 
+# ID ролей підтримки
+SUPPORT_ROLE_IDS = [1199839255220994078, 1248205289799290961, 1199845158460592219, 1199845190349897788]
+
 # Подія, яка виконується, коли бот готовий
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-    
     try:
-        # Спроба отримати канал за ID
         print(f"Attempting to get channel with ID {CHANNEL_ID}")
         channel = bot.get_channel(CHANNEL_ID)
         
@@ -41,7 +43,6 @@ async def on_ready():
         print(f"An error occurred while sending message to channel: {e}")
     check_tickets.start()
 
-# Клас для створення тікетів
 class TicketCreateView(discord.ui.View):
     def __init__(self):
         super().__init__(timeout=None)
@@ -49,13 +50,13 @@ class TicketCreateView(discord.ui.View):
 
     @discord.ui.button(label="Створити тікет", style=discord.ButtonStyle.green)
     async def create_ticket(self, button: discord.ui.Button, interaction: discord.Interaction):
+        global ticket_counter
         print(f"Button clicked by {interaction.user}. Creating ticket...")
         try:
             print("Attempting to create ticket channel...")
             guild = interaction.guild
             print(f"Guild: {guild}")
 
-            # Додаткові логи для перевірки прав
             print(f"Bot permissions in the guild: {guild.me.guild_permissions}")
 
             if not guild.me.guild_permissions.manage_channels:
@@ -63,8 +64,17 @@ class TicketCreateView(discord.ui.View):
                 await interaction.response.send_message("Бот не має дозволу на керування каналами.", ephemeral=True)
                 return
 
-            ticket_channel = await guild.create_text_channel(f"ticket-{interaction.user.name}")
+            ticket_channel = await guild.create_text_channel(f"ticket-{ticket_counter}")
+            ticket_counter += 1
             print(f"Ticket channel created: {ticket_channel}")
+
+            # Задаємо права доступу до каналу
+            await ticket_channel.set_permissions(guild.default_role, read_messages=False)
+            for role_id in SUPPORT_ROLE_IDS:
+                support_role = guild.get_role(role_id)
+                if support_role:
+                    await ticket_channel.set_permissions(support_role, read_messages=True, send_messages=True)
+            await ticket_channel.set_permissions(interaction.user, read_messages=True, send_messages=True)
 
             tickets[ticket_channel.id] = {
                 "user": interaction.user.id,
@@ -84,7 +94,6 @@ class TicketCreateView(discord.ui.View):
             print(f"Error creating ticket channel: {e}")
             await interaction.response.send_message("Помилка створення тікету.", ephemeral=True)
 
-# Клас для закриття тікетів
 class TicketCloseView(discord.ui.View):
     def __init__(self, channel_id):
         super().__init__(timeout=None)
@@ -111,7 +120,6 @@ class TicketCloseView(discord.ui.View):
             print(f"Error closing ticket: {e}")
             await interaction.response.send_message("Помилка закриття тікету.", ephemeral=True)
 
-# Функція для перевірки та видалення закритих тікетів
 @tasks.loop(minutes=1)
 async def check_tickets():
     now = datetime.utcnow()
@@ -144,7 +152,6 @@ async def check_tickets():
         except Exception as e:
             print(f"Error logging ticket deletion for channel {channel_id}: {e}")
 
-# Основна функція для запуску бота
 def main():
     print("Starting bot")
     token = os.getenv('BOT_TOKEN')
