@@ -47,7 +47,12 @@ class TicketCreateView(discord.ui.View):
     async def create_ticket(self, button: discord.ui.Button, interaction: discord.Interaction):
         print(f"Creating ticket for {interaction.user}")
         try:
-            ticket_channel = await interaction.guild.create_text_channel(f"ticket-{interaction.user.name}")
+            print("Attempting to create ticket channel...")
+            guild = interaction.guild
+            print(f"Guild: {guild}")
+            ticket_channel = await guild.create_text_channel(f"ticket-{interaction.user.name}")
+            print(f"Ticket channel created: {ticket_channel}")
+
             tickets[ticket_channel.id] = {
                 "user": interaction.user.id,
                 "created_at": datetime.utcnow()
