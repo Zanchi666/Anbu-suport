@@ -17,9 +17,20 @@ tickets = {}
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-    channel = bot.get_channel(int(os.getenv('1250019961905217686')))  # Вставте ID вашого каналу
-    await channel.send(embed=discord.Embed(title="Підтримка", description="Натисніть кнопку нижче, щоб створити тікет"),
-                       view=TicketCreateView())
+    channel_id = os.getenv('1250019961905217686')
+    if channel_id is None:
+        print("CHANNEL_ID is not set in environment variables.")
+        return
+    try:
+        channel = bot.get_channel(int(channel_id))
+        if channel is None:
+            print(f"Channel with ID {channel_id} not found.")
+        else:
+            await channel.send(embed=discord.Embed(title="Підтримка", description="Натисніть кнопку нижче, щоб створити тікет"),
+                               view=TicketCreateView())
+            print(f"Message sent to channel ID {channel_id}.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
     check_tickets.start()
 
 class TicketCreateView(discord.ui.View):
