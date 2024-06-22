@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands, tasks
 import asyncio
 from datetime import datetime, timedelta
+import os
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -15,9 +16,10 @@ tickets = {}
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-    channel = bot.get_channel(YOUR_CHANNEL_ID)  # Вставте ID вашого каналу
+    channel = bot.get_channel(int(os.getenv('CHANNEL_ID')))  # Вставте ID вашого каналу
     await channel.send(embed=discord.Embed(title="Підтримка", description="Натисніть кнопку нижче, щоб створити тікет"),
                        view=TicketCreateView())
+    check_tickets.start()
 
 class TicketCreateView(discord.ui.View):
     @discord.ui.button(label="Створити тікет", style=discord.ButtonStyle.green)
@@ -53,13 +55,16 @@ async def check_tickets():
                 await channel.delete()
             to_delete.append(channel_id)
     for channel_id in to_delete:
-        log_channel = bot.get_channel(YOUR_LOG_CHANNEL_ID)  # Вставте ID вашого каналу для логів
+        log_channel = bot.get_channel(int(os.getenv('LOG_CHANNEL_ID')))  # Вставте ID вашого каналу для логів
         user = bot.get_user(tickets[channel_id]['user'])
         created_at = tickets[channel_id]['created_at']
         closed_at = tickets[channel_id]['closed_at']
         await log_channel.send(f"Тікет від {user.mention} створений {created_at} закрито {closed_at} видалено.")
         del tickets[channel_id]
 
-check_tickets.start()
+def main():
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(bot.start(os.getenv('BOT_TOKEN')))
 
-bot.run('YOUR_BOT_TOKEN')  # Вставте ваш токен бота
+if __name__ == "__main__":
+    main()
