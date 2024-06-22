@@ -56,9 +56,11 @@ class TicketCreateView(discord.ui.View):
                 f"{interaction.user.mention}, ваш тікет створено! Адміністрація скоро зв'яжеться з вами.",
                 view=TicketCloseView(ticket_channel.id)
             )
+            await interaction.response.send_message("Тікет успішно створено!", ephemeral=True)
             print(f"Ticket channel {ticket_channel.name} created for {interaction.user}.")
         except Exception as e:
             print(f"Error creating ticket channel: {e}")
+            await interaction.response.send_message("Помилка створення тікету.", ephemeral=True)
 
 # Клас для закриття тікетів
 class TicketCloseView(discord.ui.View):
@@ -74,9 +76,11 @@ class TicketCloseView(discord.ui.View):
             await channel.send("Тікет закрито! Канал буде видалено через 7 днів.")
             tickets[self.channel_id]['closed_at'] = datetime.utcnow()
             await channel.set_permissions(interaction.guild.default_role, send_messages=False, read_messages=False)
+            await interaction.response.send_message("Тікет успішно закрито!", ephemeral=True)
             print(f"Ticket in channel {self.channel_id} closed.")
         except Exception as e:
             print(f"Error closing ticket: {e}")
+            await interaction.response.send_message("Помилка закриття тікету.", ephemeral=True)
 
 # Функція для перевірки та видалення закритих тікетів
 @tasks.loop(minutes=1)
