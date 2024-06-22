@@ -92,7 +92,7 @@ class TicketCreateView(discord.ui.View):
             print(f"Ticket channel {ticket_channel.name} created for {interaction.user}.")
         except Exception as e:
             print(f"Error creating ticket channel: {e}")
-            await interaction.response.send_message("Помилка створення тікету.", ephemeral=True)
+            await interaction.response.send_message(f"Помилка створення тікету: {e}", ephemeral=True)
 
 class TicketCloseView(discord.ui.View):
     def __init__(self, channel_id):
@@ -118,7 +118,7 @@ class TicketCloseView(discord.ui.View):
             print(f"Ticket in channel {self.channel_id} closed.")
         except Exception as e:
             print(f"Error closing ticket: {e}")
-            await interaction.response.send_message("Помилка закриття тікету.", ephemeral=True)
+            await interaction.response.send_message(f"Помилка закриття тікету: {e}", ephemeral=True)
 
 @tasks.loop(minutes=1)
 async def check_tickets():
