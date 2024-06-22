@@ -18,7 +18,7 @@ tickets = {}
 @bot.event
 async def on_ready():
     print(f'Logged in as {bot.user.name}')
-    channel_id = os.getenv('CHANNEL_ID')
+    channel_id = os.getenv('1250019961905217686')
     
     # Перевірка, чи встановлено CHANNEL_ID у змінних середовища
     if channel_id is None:
@@ -99,7 +99,7 @@ async def check_tickets():
                 print(f"Error deleting channel {channel_id}: {e}")
     for channel_id in to_delete:
         try:
-            log_channel = bot.get_channel(int(os.getenv('LOG_CHANNEL_ID')))
+            log_channel = bot.get_channel(int(os.getenv('1254109085352333332')))
             user = bot.get_user(tickets[channel_id]['user'])
             created_at = tickets[channel_id]['created_at']
             closed_at = tickets[channel_id]['closed_at']
